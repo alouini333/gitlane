@@ -226,6 +226,13 @@ describe('credentials', () => {
     expect(reg.credential('anthropic')).toBeNull()
     expect(new CredentialStore(file, cipher).get('openai')).toEqual({ apiKey: 'sk-secret' })
   })
+
+  it('explains that a "claude setup-token" token is not an API key, without calling the API', async () => {
+    const store = new CredentialStore(join(dir, 'creds.json'), cipher)
+    const reg = new ProviderRegistry(store, {})
+    await expect(reg.connect('anthropic', { apiKey: ' sk-ant-oat01-abc ' })).rejects.toThrow(/claude setup-token.*not an API key/)
+    expect(store.get('anthropic')).toBeNull()
+  })
 })
 
 // ------------------------------------------------------------------ agent loop
