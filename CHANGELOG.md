@@ -4,6 +4,8 @@ All notable changes to Gitlane are documented here. The format follows [Keep a C
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-25
+
 The first public release.
 
 ### Added
@@ -26,4 +28,5 @@ The first public release.
 - **Preferences** for branch-switching behavior, the double-click action on remote branches, and the terminal font.
 - Packages for macOS (Apple silicon and Intel), Windows and Linux (AppImage and .deb).
 
-[Unreleased]: https://github.com/alouini333/gitlane/commits/main
+[Unreleased]: https://github.com/alouini333/gitlane/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/alouini333/gitlane/releases/tag/v0.1.0

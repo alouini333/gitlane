@@ -1,7 +1,7 @@
 {
   "name": "gitlane",
   "productName": "Gitlane",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A fast, open-source Git client with a readable commit graph, line staging, GitHub pull requests, an integrated terminal and a coding agent.",
   "keywords": [
     "git",
@@ -73,7 +73,7 @@
   "build": {
     "appId": "dev.gitlane.app",
     "productName": "Gitlane",
-    "copyright": "Copyright \u00a9 2026 Gitlane contributors",
+    "copyright": "Copyright © 2026 Gitlane contributors",
     "files": [
       "out/**/*"
     ],
