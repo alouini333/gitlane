@@ -1,0 +1,159 @@
+name: Publish release
+
+# Trunk-based releases, step 2 of 2. Runs when a "Release vX.Y.Z" pull request (opened by release.yml
+# from a release/vX.Y.Z branch) is merged into main. It tags the merge commit, builds the installers
+# for every platform and publishes the GitHub release. Other pull requests skip every job.
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Tag
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Tag the merge commit
+        id: tag
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          if [ "$BRANCH" != "release/$tag" ]; then
+            echo "::error::Branch $BRANCH doesn't match the version in package.json ($version)."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Re-runs are fine: keep an existing tag if it already points at this commit. For an annotated
+          # tag, the last line is the peeled commit (refs/tags/vX^{}), not the tag object.
+          existing=$(git ls-remote origin "refs/tags/$tag" "refs/tags/$tag^{}" | tail -n1 | cut -f1)
+          if [ -n "$existing" ]; then
+            if [ "$existing" != "$SHA" ]; then
+              echo "::error::Tag $tag already exists on another commit ($existing)."
+              exit 1
+            fi
+            echo "Tag $tag already points at $SHA."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$tag" -m "Gitlane $tag" "$SHA"
+            git push origin "$tag"
+          fi
+          echo "Publishing $tag from $SHA" >> "$GITHUB_STEP_SUMMARY"
+          git push origin --delete "$BRANCH" || true
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: tag
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+            target: --mac
+          - name: Windows
+            os: windows-latest
+            target: --win
+          - name: Linux
+            os: ubuntu-latest
+            target: --linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: v${{ needs.tag.outputs.version }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Package installers
+        run: npx electron-builder ${{ matrix.target }} --publish never
+        env:
+          # No signing certificates yet: build unsigned packages.
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v7
+        with:
+          name: gitlane-${{ matrix.name }}
+          if-no-files-found: error
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.exe
+            dist/*.AppImage
+            dist/*.deb
+
+  publish:
+    name: Publish v${{ needs.tag.outputs.version }}
+    needs: [tag, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: v${{ needs.tag.outputs.version }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Write release notes
+        run: |
+          node scripts/changelog.mts notes "${{ needs.tag.outputs.version }}" > notes.md
+          {
+            echo
+            echo "## Downloads"
+            echo
+            echo "| System | File |"
+            echo "| --- | --- |"
+            echo "| macOS, Apple silicon | \`Gitlane-mac-arm64.dmg\` |"
+            echo "| macOS, Intel | \`Gitlane-mac-x64.dmg\` |"
+            echo "| Windows 10/11 (x64) | \`Gitlane-win-x64-setup.exe\` |"
+            echo "| Linux (x64) | \`Gitlane-linux-x86_64.AppImage\` or \`Gitlane-linux-amd64.deb\` |"
+            echo
+            echo "Builds are not code-signed yet. See the [README](https://github.com/${{ github.repository }}#install) for how to open them."
+          } >> notes.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ needs.tag.outputs.version }}"
+          ls -la artifacts
+          gh release create "v$version" artifacts/* \
+            --title "Gitlane v$version" \
+            --notes-file notes.md \
+            --verify-tag

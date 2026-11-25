@@ -67,20 +67,20 @@ Write the subject in the imperative mood, under about 72 characters ("Add line s
 
 ## Releases
 
-Releases are cut from `main` with one click:
+Releases are cut from `main` in two steps, and like every change they land through a pull request.
 
-1. Open **Actions → Release → Run workflow**.
-2. Keep the branch on `main`, choose the kind of release (**minor**, **major** or **patch**), and click **Run workflow**.
-
-The [Release workflow](.github/workflows/release.yml) then:
-
-1. runs the type-check and tests on `main`;
-2. bumps the version in `package.json`, and moves the **Unreleased** notes in `CHANGELOG.md` under the new version (`scripts/changelog.mts`);
-3. commits "Release vX.Y.Z" to `main` and tags it;
-4. builds macOS (Apple silicon and Intel), Windows and Linux installers in parallel;
-5. publishes a GitHub release with the installers and that version's changelog notes.
+1. **Start the release.** Open **Actions → Release → Run workflow**, keep the branch on `main`, choose the kind of release (**minor**, **major** or **patch**), and click **Run workflow**. The [Release workflow](.github/workflows/release.yml):
+   - runs the type-check and tests on `main`;
+   - bumps the version in `package.json`, and moves the **Unreleased** notes in `CHANGELOG.md` under the new version (`scripts/changelog.mts`);
+   - pushes a `release/vX.Y.Z` branch and opens a **Release vX.Y.Z** pull request with those notes.
+2. **Merge the release PR.** Approve and merge it. The [Publish release workflow](.github/workflows/publish.yml) then:
+   - tags the merge commit `vX.Y.Z` and deletes the release branch;
+   - builds macOS (Apple silicon and Intel), Windows and Linux installers in parallel;
+   - publishes a GitHub release with the installers and that version's changelog notes.
 
 Pick **major** for breaking changes, **minor** for new features, and **patch** for fixes only.
+
+Merge the release PR before other pull requests, so the release contains exactly what its notes describe. If a build fails (GitHub sometimes runs short of macOS runners), open the Publish release run and click **Re-run failed jobs**.
 
 ## Questions
 
