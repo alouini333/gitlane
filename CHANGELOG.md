@@ -4,6 +4,10 @@ All notable changes to Gitlane are documented here. The format follows [Keep a C
 
 ## [Unreleased]
 
+### Fixed
+
+- Pasting a `claude setup-token` token as the Anthropic key now explains that it isn't an API key, instead of showing a confusing "429 rate_limit_error".
+
 ## [0.1.0] - 2026-11-25
 
 The first public release.

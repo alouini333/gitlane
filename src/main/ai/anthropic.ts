@@ -6,7 +6,23 @@ import { RetryableError, nativeFor, portableId, type Credential, type ProviderAd
 
 type Params = Anthropic.Beta.Messages.MessageCreateParamsNonStreaming
 
-const client = (cred: Credential) => new Anthropic({ apiKey: cred.apiKey, baseURL: cred.baseUrl || undefined, maxRetries: 2 })
+/**
+ * `claude setup-token` prints a Claude Code sign-in token (sk-ant-oat…) tied to a Claude subscription.
+ * It isn't an API key, and the API answers it with an unhelpful 429, so explain instead.
+ */
+export function checkAnthropicKey(key: string | undefined) {
+  if (key?.startsWith('sk-ant-oat')) {
+    throw new Error(
+      'This is a Claude Code sign-in token (from "claude setup-token"), not an API key. It only works in Claude Code. ' +
+        'Create an API key at platform.claude.com/settings/keys (it starts with sk-ant-api) and paste that instead.'
+    )
+  }
+}
+
+const client = (cred: Credential) => {
+  checkAnthropicKey(cred.apiKey)
+  return new Anthropic({ apiKey: cred.apiKey, baseURL: cred.baseUrl || undefined, maxRetries: 2 })
+}
 
 /** Current model families take adaptive thinking + effort; older ones get neither. */
 export function anthropicFeatures(model: string) {
