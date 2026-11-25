@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 520" width="1600" height="520">
+  <title>Gitlane</title>
+  <defs>
+    <linearGradient id="bannerBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171d3a"/>
+      <stop offset="1" stop-color="#0b0e1b"/>
+    </linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22e3b8"/>
+      <stop offset="0.45" stop-color="#5b8cff"/>
+      <stop offset="1" stop-color="#ff5fae"/>
+    </linearGradient>
+    <radialGradient id="bannerAura" cx="0.2" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#5b6cff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#5b6cff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fadeRight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0.72" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="1"/>
+    </linearGradient>
+    <mask id="lanesMask"><rect width="1600" height="520" fill="url(#fadeRight)"/></mask>
+    <clipPath id="card"><rect width="1600" height="520" rx="36"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="1600" height="520" fill="url(#bannerBg)"/>
+    <rect width="1600" height="520" fill="url(#grid)"/>
+    <rect width="1600" height="520" fill="url(#bannerAura)"/>
+    <g mask="url(#lanesMask)"><path d="M1180 560 V-40" stroke="#22e3b8" stroke-width="10" stroke-linecap="round" opacity="0.16"/><path d="M1260 560 V-40" stroke="#5b7cff" stroke-width="10" stroke-linecap="round" opacity="0.2"/><path d="M1340 560 V-40" stroke="#c066ff" stroke-width="10" stroke-linecap="round" opacity="0.16"/><path d="M1420 560 V-40" stroke="#ff5fae" stroke-width="10" stroke-linecap="round" opacity="0.2"/><path d="M1500 560 V-40" stroke="#3fa9ff" stroke-width="10" stroke-linecap="round" opacity="0.16"/><path d="M1180 470 C1180 420 1260 430 1260 380" stroke="#22e3b8" stroke-width="10" fill="none" opacity="0.22"/><path d="M1340 300 C1340 250 1420 260 1420 210" stroke="#c066ff" stroke-width="10" fill="none" opacity="0.22"/><path d="M1500 150 C1500 100 1420 110 1420 60" stroke="#3fa9ff" stroke-width="10" fill="none" opacity="0.22"/><circle cx="1180" cy="470" r="16" fill="#22e3b8" opacity="0.35"/><circle cx="1260" cy="380" r="16" fill="#5b7cff" opacity="0.35"/><circle cx="1340" cy="300" r="16" fill="#c066ff" opacity="0.35"/><circle cx="1420" cy="210" r="16" fill="#ff5fae" opacity="0.35"/><circle cx="1500" cy="150" r="16" fill="#3fa9ff" opacity="0.35"/><circle cx="1260" cy="120" r="16" fill="#5b7cff" opacity="0.35"/><circle cx="1420" cy="420" r="16" fill="#ff5fae" opacity="0.35"/></g>
+  </g>
+  <svg x="40" y="30" width="460" height="460" viewBox="0 0 1024 1024">
+  
+  <defs>
+    <linearGradient id="bg" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#262f57"/>
+      <stop offset="0.55" stop-color="#141a33"/>
+      <stop offset="1" stop-color="#0a0d1a"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="0.42" cy="0.38" r="0.62">
+      <stop offset="0" stop-color="#5b6cff" stop-opacity="0.32"/>
+      <stop offset="0.6" stop-color="#5b6cff" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#5b6cff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="main" gradientUnits="userSpaceOnUse" x1="0" y1="960" x2="0" y2="80">
+      <stop offset="0" stop-color="#22e3b8"/>
+      <stop offset="0.55" stop-color="#3fa9ff"/>
+      <stop offset="1" stop-color="#5b7cff"/>
+    </linearGradient>
+    <linearGradient id="feature" gradientUnits="userSpaceOnUse" x1="0" y1="742" x2="0" y2="312">
+      <stop offset="0" stop-color="#9d6bff"/>
+      <stop offset="1" stop-color="#ff5fae"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="nodeGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <clipPath id="tile">
+      <rect x="100" y="100" width="824" height="824" rx="186"/>
+    </clipPath>
+  </defs>
+
+  <!-- tile -->
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bg)"/>
+  <g clip-path="url(#tile)">
+    <rect x="100" y="100" width="824" height="824" fill="url(#aura)"/>
+
+    <!-- road markings: the "lanes" -->
+    <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="10" stroke-linecap="round" stroke-dasharray="34 30">
+      <line x1="300" y1="80" x2="300" y2="960"/>
+      <line x1="760" y1="80" x2="760" y2="960"/>
+    </g>
+
+    <!-- glow underlay -->
+    <g fill="none" stroke-linecap="round" filter="url(#glow)" opacity="0.85">
+      <path d="M430 960 V60" stroke="url(#main)" stroke-width="70"/>
+      <path d="M430 742 C430 650 630 668 630 578 V478 C630 388 430 404 430 312" stroke="url(#feature)" stroke-width="70"/>
+    </g>
+
+    <!-- lanes -->
+    <g fill="none" stroke-linecap="round">
+      <path d="M430 960 V60" stroke="url(#main)" stroke-width="54"/>
+      <path d="M430 742 C430 650 630 668 630 578 V478 C630 388 430 404 430 312" stroke="url(#feature)" stroke-width="54"/>
+    </g>
+  </g>
+
+  <!-- commits -->
+  <g filter="url(#nodeGlow)" opacity="0.9">
+    <circle cx="430" cy="820" r="52" fill="#22e3b8"/>
+    <circle cx="630" cy="528" r="52" fill="#d066e0"/>
+    <circle cx="430" cy="296" r="64" fill="#6f8bff"/>
+  </g>
+  <g stroke="#10152a" stroke-width="16">
+    <circle cx="430" cy="820" r="46" fill="#22e3b8"/>
+    <circle cx="630" cy="528" r="46" fill="#d066e0"/>
+    <circle cx="430" cy="296" r="58" fill="#ffffff"/>
+  </g>
+  <circle cx="430" cy="296" r="26" fill="#5b7cff"/>
+
+  <!-- glass sheen -->
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#sheen)"/>
+  <rect x="101.5" y="101.5" width="821" height="821" rx="184.5" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="3"/>
+</svg>
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="540" y="248" font-size="148" font-weight="800" letter-spacing="-4" fill="url(#word)">Gitlane</text>
+    <text x="545" y="326" font-size="38" fill="#a7b2cf">A fast, open-source Git client with a graph you can read.</text>
+    <g transform="translate(545 392)"><rect width="178" height="46" rx="23" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/><text x="89.0" y="30" text-anchor="middle" font-size="21" fill="#c9d2ea" font-weight="500">Commit graph</text></g><g transform="translate(735 392)"><rect width="178" height="46" rx="23" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/><text x="89.0" y="30" text-anchor="middle" font-size="21" fill="#c9d2ea" font-weight="500">Line staging</text></g><g transform="translate(925 392)"><rect width="189" height="46" rx="23" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/><text x="94.5" y="30" text-anchor="middle" font-size="21" fill="#c9d2ea" font-weight="500">Pull requests</text></g><g transform="translate(1126 392)"><rect width="178" height="46" rx="23" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/><text x="89.0" y="30" text-anchor="middle" font-size="21" fill="#c9d2ea" font-weight="500">Coding agent</text></g><g transform="translate(1316 392)"><rect width="133" height="46" rx="23" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/><text x="66.5" y="30" text-anchor="middle" font-size="21" fill="#c9d2ea" font-weight="500">Terminal</text></g>
+  </g>
+</svg>
