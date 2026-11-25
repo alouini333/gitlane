@@ -4,6 +4,8 @@ All notable changes to Gitlane are documented here. The format follows [Keep a C
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-25
+
 ### Fixed
 
 - Pasting a `claude setup-token` token as the Anthropic key now explains that it isn't an API key, instead of showing a confusing "429 rate_limit_error".
@@ -32,5 +34,6 @@ The first public release.
 - **Preferences** for branch-switching behavior, the double-click action on remote branches, and the terminal font.
 - Packages for macOS (Apple silicon and Intel), Windows and Linux (AppImage and .deb).
 
-[Unreleased]: https://github.com/alouini333/gitlane/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/alouini333/gitlane/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/alouini333/gitlane/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/alouini333/gitlane/releases/tag/v0.1.0

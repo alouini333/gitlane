@@ -1,7 +1,7 @@
 {
   "name": "gitlane",
   "productName": "Gitlane",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A fast, open-source Git client with a readable commit graph, line staging, GitHub pull requests, an integrated terminal and a coding agent.",
   "keywords": [
     "git",
