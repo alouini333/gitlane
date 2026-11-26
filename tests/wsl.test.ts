@@ -228,16 +228,30 @@ describe.runIf(realWindows && process.env.GITLANE_TEST_WSL === '1')('repositorie
   }, 60_000)
 
   it('starts the integrated terminal in the distribution', async () => {
-    const events: string[] = []
-    const sink: TerminalSink = { send: (channel, _id, payload) => void (channel === 'term:data' && events.push(String(payload))), isDestroyed: () => false }
     const mgr = new TerminalManager()
-    const { id, shell } = mgr.create(1, sink, { cwd: unc, cols: 100, rows: 30 })
-    expect(shell).toBe(distro)
-    try {
-      mgr.write(1, id, 'echo "WSL_$(uname -s)"; pwd\r')
-      await waitFor(() => /WSL_Linux/.test(events.join('')) && events.join('').includes('/tmp/gitlane-wsl'), 30_000)
-    } finally {
-      mgr.kill(1, id)
+    // Collects one session's output; on timeout, the error shows what the terminal printed.
+    const run = async (opts: { cwd: string; shell?: string; args?: string[] }, input: string, expected: RegExp[]) => {
+      const events: string[] = []
+      const exits: number[] = []
+      const sink: TerminalSink = {
+        send: (channel, _id, payload) => void (channel === 'term:data' ? events.push(String(payload)) : exits.push(Number(payload))),
+        isDestroyed: () => false
+      }
+      const session = mgr.create(1, sink, { cols: 100, rows: 30, ...opts })
+      try {
+        await new Promise((r) => setTimeout(r, 1500))
+        mgr.write(1, session.id, input)
+        await waitFor(() => expected.every((re) => re.test(events.join(''))), 30_000).catch(() => {
+          throw new Error(`Expected ${expected.join(', ')}; exit ${JSON.stringify(exits)}; output: ${JSON.stringify(events.join('').slice(-2000))}`)
+        })
+      } finally {
+        mgr.kill(1, session.id)
+      }
+      return session
     }
-  }, 60_000)
+    // Baseline: a Windows shell in a pseudo-terminal.
+    await run({ cwd: process.cwd(), shell: 'cmd.exe', args: [] }, 'echo PTY_%OS%\r', [/PTY_Windows_NT/])
+    const session = await run({ cwd: unc }, 'echo "WSL_$(uname -s)"; pwd\r', [/WSL_Linux/, /\/tmp\/gitlane-wsl/])
+    expect(session.shell).toBe(distro)
+  }, 90_000)
 })
