@@ -2646,6 +2646,8 @@ body.resizing .splitter {
 
 .modal.prefs {
   width: 560px;
+  max-height: calc(86vh - 16px);
+  overflow-y: auto;
 }
 .pref-group {
   display: flex;
@@ -3266,4 +3268,64 @@ body.resizing-v .terminal-resize {
 /* macOS: leave room for the traffic lights drawn inside the toolbar */
 .platform-mac .toolbar {
   padding-left: 84px;
+}
+
+/* ------------------------------------------------------------------ updates */
+
+.update-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.update-pill:hover {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.welcome-update {
+  margin-left: auto;
+}
+.modal.update-dialog {
+  width: 560px;
+  max-height: calc(86vh - 16px);
+}
+.update-notes {
+  min-height: 0;
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.update-notes > :first-child {
+  margin-top: 0;
+}
+.update-notes > :last-child {
+  margin-bottom: 0;
+}
+.update-skip {
+  margin-right: auto;
+}
+.pref-updates {
+  align-items: center;
+  justify-content: space-between;
+}
+.pref-error {
+  color: var(--red);
+}
+.pref-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
 }

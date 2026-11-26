@@ -20,6 +20,8 @@ import { Sidebar } from './components/Sidebar'
 import { Toolbar } from './components/Toolbar'
 import { Welcome } from './components/Welcome'
 import { loadRecent, openRepo, refresh, useStore } from './store'
+import { UpdateDialog } from './components/Updates'
+import { startUpdateChecks } from './updates'
 
 function usePersistentWidth(key: string, initial: number, min: number, max: number) {
   const [width, setWidth] = useState(() => {
@@ -102,6 +104,7 @@ export function App() {
     if (booted) return
     booted = true
     listenToAgent()
+    startUpdateChecks()
     void (async () => {
       await loadRecent()
       const requested = await app.initialRepo()
@@ -155,6 +158,7 @@ export function App() {
       <Picker />
       <SettingsDialog />
       <ProvidersDialog />
+      <UpdateDialog />
       <Dialog />
       <Toasts />
     </>

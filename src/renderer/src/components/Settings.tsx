@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { closeSettings, updateSettings, useSettings, type DirtySwitchSetting, type RemoteDoubleClick } from '../settings'
 import { openProviders } from '../agent'
+import { checkForUpdates, openUpdateDialog, useUpdates } from '../updates'
 import { cls } from '../util'
 
 interface Choice<T> {
@@ -39,6 +40,47 @@ function Group<T extends string>({ title, choices, value, onChange }: { title: s
           </span>
         </label>
       ))}
+    </fieldset>
+  )
+}
+
+function UpdatesGroup() {
+  const enabled = useSettings((s) => s.checkUpdates)
+  const { version, info, checking, error } = useUpdates()
+  const status = checking
+    ? 'Checking…'
+    : error
+      ? error
+      : info?.available
+        ? `Gitlane ${info.latest} is available.`
+        : info?.latest
+          ? 'You’re on the latest version.'
+          : info
+            ? 'No releases published yet.'
+            : ''
+  return (
+    <fieldset className="pref-group">
+      <legend>Updates</legend>
+      <div className="pref-row pref-updates">
+        <span className="pref-detail">
+          Gitlane {version || '…'}
+          {status && <> · <span className={cls(error && 'pref-error')}>{status}</span></>}
+        </span>
+        {info?.available ? (
+          <button className="btn btn-sm" onClick={openUpdateDialog}>
+            Show update
+          </button>
+        ) : (
+          <button className="btn btn-sm" disabled={checking} onClick={() => void checkForUpdates(true)}>
+            Check now
+          </button>
+        )}
+      </div>
+      <label className="pref-check">
+        <input type="checkbox" checked={enabled} onChange={(e) => updateSettings({ checkUpdates: e.target.checked })} />
+        <span>Check for updates automatically</span>
+      </label>
+      <span className="pref-detail">Asks GitHub for the latest release. Nothing is installed without you.</span>
     </fieldset>
   )
 }
@@ -113,6 +155,7 @@ export function SettingsDialog() {
             </button>
           </div>
         </fieldset>
+        <UpdatesGroup />
         <div className="modal-actions">
           <button className="btn btn-primary" onClick={closeSettings} autoFocus>
             Done

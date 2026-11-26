@@ -6,6 +6,7 @@ import { BrowserWindow, app, clipboard, dialog, ipcMain, net, safeStorage, shell
 import type { ApiResult, AppApi, RepoChangeEvent } from '../shared/types'
 import { REPO_METHODS, Repository, resolveRepoRoot } from './git/repository'
 import { runGit, runGitForPath } from './git/runner'
+import { checkForUpdate } from './updates'
 import { parseWslPath, wslShell } from './wsl'
 import { setFetch } from './github'
 import { TerminalManager } from './terminal'
@@ -79,6 +80,9 @@ function openTerminal(path: string) {
   else spawn('x-terminal-emulator', [], { ...opts, cwd: path }).unref()
 }
 
+/** Development builds can pretend to be another version, to try the update notice. */
+const appVersion = () => (!app.isPackaged && process.env.GITLANE_PRETEND_VERSION) || app.getVersion()
+
 type Handlers = { [K in keyof AppApi]: (sender: WebContents, ...args: Parameters<AppApi[K]>) => ReturnType<AppApi[K]> }
 
 const appHandlers: Handlers = {
@@ -119,6 +123,19 @@ const appHandlers: Handlers = {
   },
   async copyText(_sender, text) {
     clipboard.writeText(text)
+  },
+  async version() {
+    return appVersion()
+  },
+  checkForUpdates() {
+    return checkForUpdate({
+      current: appVersion(),
+      platform: process.platform,
+      arch: process.arch,
+      appImage: !!process.env.APPIMAGE,
+      // Chromium's network stack: honors system proxy settings.
+      fetch: (input, init) => net.fetch(input as string, init)
+    })
   },
   async openExternal(_sender, url) {
     if (!/^https?:\/\//.test(url)) throw new Error('Only web links can be opened')
