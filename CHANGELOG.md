@@ -4,6 +4,8 @@ All notable changes to Gitlane are documented here. The format follows [Keep a C
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-26
+
 ### Added
 
 - **Repositories inside WSL** on Windows: open a repository under `\\wsl.localhost\<distro>\…` and git, the integrated terminal and the coding agent's commands run inside that Linux distribution, with its git config, credentials and SSH keys.
@@ -44,6 +46,7 @@ The first public release.
 - **Preferences** for branch-switching behavior, the double-click action on remote branches, and the terminal font.
 - Packages for macOS (Apple silicon and Intel), Windows and Linux (AppImage and .deb).
 
-[Unreleased]: https://github.com/alouini333/gitlane/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/alouini333/gitlane/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/alouini333/gitlane/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/alouini333/gitlane/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/alouini333/gitlane/releases/tag/v0.1.0
