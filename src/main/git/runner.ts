@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process'
 import { delimiter } from 'node:path'
+import { decodeWslText, explainWslFailure, parseWslPath, toWindowsPath, wslInvocation } from '../wsl'
 
 export class GitError extends Error {
   constructor(
@@ -42,15 +43,26 @@ export function childEnv(): NodeJS.ProcessEnv {
   }
 }
 
-/** Run `git <args>` in `cwd` and resolve with stdout. */
+/** Variables from childEnv() that git inside WSL needs too. */
+const WSL_GIT_ENV = ['GIT_TERMINAL_PROMPT', 'GIT_EDITOR', 'GIT_PAGER', 'LC_ALL']
+
+/**
+ * Run `git <args>` in `cwd` and resolve with stdout. For a folder inside WSL (\\wsl.localhost\…),
+ * git runs in that distribution through wsl.exe.
+ */
 export function runGit(cwd: string, args: string[], opts: RunOptions = {}): Promise<string> {
   const fullArgs = ['-c', 'core.quotepath=false', '-c', 'color.ui=false', ...args]
+  const wsl = parseWslPath(cwd)
+  const run = wsl ? wslInvocation(wsl, ['git', ...fullArgs], childEnv(), WSL_GIT_ENV) : { file: 'git', args: fullArgs, env: childEnv() }
   return new Promise((resolve, reject) => {
-    const child = spawn('git', fullArgs, {
-      cwd,
-      env: childEnv(),
+    const child = spawn(run.file, run.args, {
+      // wsl.exe changes directory itself (--cd); Windows can't start a process in a UNC folder.
+      cwd: wsl ? undefined : cwd,
+      env: run.env,
       // Own session: no controlling terminal, so ssh/credential prompts fail instead of hanging.
       detached: process.platform !== 'win32',
+      // No console window flashing up on Windows for every git call.
+      windowsHide: true,
       stdio: ['pipe', 'pipe', 'pipe']
     })
     const out: Buffer[] = []
@@ -58,16 +70,18 @@ export function runGit(cwd: string, args: string[], opts: RunOptions = {}): Prom
     child.stdout.on('data', (d: Buffer) => out.push(d))
     child.stderr.on('data', (d: Buffer) => err.push(d))
     child.on('error', (e) => {
-      reject(new GitError(`Could not run git: ${e.message}`, args, null, '', ''))
+      reject(new GitError(`Could not run ${wsl ? 'wsl.exe' : 'git'}: ${e.message}`, args, null, '', ''))
     })
     child.on('close', (code) => {
-      const stdout = Buffer.concat(out).toString('utf8')
-      const stderr = Buffer.concat(err).toString('utf8')
       if (code === 0 || (code !== null && opts.okCodes?.includes(code))) {
-        resolve(stdout)
+        resolve(Buffer.concat(out).toString('utf8'))
         return
       }
-      const message = stderr.trim() || stdout.trim() || `git ${args[0]} exited with code ${code}`
+      const decode = (b: Buffer[]) => (wsl ? decodeWslText(Buffer.concat(b)) : Buffer.concat(b).toString('utf8'))
+      const stdout = decode(out)
+      const stderr = decode(err)
+      let message = stderr.trim() || stdout.trim() || `git ${args[0]} exited with code ${code}`
+      if (wsl) message = explainWslFailure(wsl, 'git', message)
       reject(new GitError(message, args, code, stderr, stdout))
     })
     child.stdin.on('error', () => {
@@ -75,4 +89,11 @@ export function runGit(cwd: string, args: string[], opts: RunOptions = {}): Prom
     })
     child.stdin.end(opts.input ?? '')
   })
+}
+
+/** Run git for a path it prints (e.g. `rev-parse --show-toplevel`), returned in a form this OS can open. */
+export async function runGitForPath(cwd: string, args: string[]): Promise<string> {
+  const out = (await runGit(cwd, args)).trim()
+  const wsl = parseWslPath(cwd)
+  return wsl && out ? toWindowsPath(wsl, out) : out
 }

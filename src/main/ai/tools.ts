@@ -7,6 +7,7 @@ import type { ToolDisplay, ToolKind } from '../../shared/agent'
 import { childEnv, runGit } from '../git/runner'
 import type { ToolSpec } from './adapter'
 import { lineDiff } from './diff'
+import { parseWslPath, wslInvocation } from '../wsl'
 
 const s = (description: string) => ({ type: 'string' as const, description })
 const i = (description: string) => ({ type: 'integer' as const, description })
@@ -361,14 +362,19 @@ export class RepoTools {
 
   #exec(command: string, seconds: number, signal: AbortSignal): Promise<ToolOutcome> {
     return new Promise((resolveOutcome) => {
-      const [shell, args] =
-        process.platform === 'win32'
-          ? [process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', command]]
-          : [process.env.SHELL || (process.platform === 'darwin' ? '/bin/zsh' : '/bin/bash'), ['-lc', command]]
-      const child = spawn(shell, args, {
-        cwd: this.root,
-        env: { ...childEnv(), CI: '1', PAGER: 'cat', GIT_PAGER: 'cat' },
+      const env = { ...childEnv(), CI: '1', PAGER: 'cat', GIT_PAGER: 'cat' }
+      // Inside WSL, commands run in the distribution with bash, like they would in its terminal.
+      const wsl = parseWslPath(this.root)
+      const run = wsl
+        ? wslInvocation(wsl, ['bash', '-lc', command], env, ['CI', 'PAGER', 'GIT_PAGER', 'GIT_TERMINAL_PROMPT', 'GIT_EDITOR', 'LC_ALL'])
+        : process.platform === 'win32'
+          ? { file: process.env.ComSpec || 'cmd.exe', args: ['/d', '/s', '/c', command], env }
+          : { file: process.env.SHELL || (process.platform === 'darwin' ? '/bin/zsh' : '/bin/bash'), args: ['-lc', command], env }
+      const child = spawn(run.file, run.args, {
+        cwd: wsl ? undefined : this.root,
+        env: run.env,
         detached: process.platform !== 'win32',
+        windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe']
       })
       let output = ''

@@ -56,11 +56,17 @@ export async function tokenFor(host: string): Promise<string | null> {
   if (envToken) return envToken
   const cached = tokens.get(host)
   if (cached && cached.expires > Date.now()) return cached.value
-  const value = await new Promise<string | null>((resolve) => {
-    execFile('gh', ['auth', 'token', '--hostname', host], { env: childEnv(), timeout: 5000 }, (err, stdout) =>
-      resolve(err ? null : stdout.trim() || null)
-    )
-  })
+  const ghToken = (file: string, args: string[]) =>
+    new Promise<string | null>((resolve) => {
+      execFile(file, args, { env: { ...childEnv(), WSL_UTF8: '1' }, timeout: 5000, windowsHide: true }, (err, stdout) =>
+        resolve(err ? null : stdout.trim() || null)
+      )
+    })
+  let value = await ghToken('gh', ['auth', 'token', '--hostname', host])
+  // On Windows, people who work in WSL often have the GitHub CLI signed in only there.
+  if (!value && process.platform === 'win32' && /^[\w.-]+$/.test(host)) {
+    value = await ghToken('wsl.exe', ['--exec', 'sh', '-lc', 'gh auth token --hostname "$1"', 'sh', host])
+  }
   tokens.set(host, { value, expires: Date.now() + (value ? 10 * 60_000 : 30_000) })
   return value
 }

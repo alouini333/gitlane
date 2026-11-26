@@ -46,7 +46,7 @@ import {
   parseStashes,
   parseStatus
 } from './parsers'
-import { runGit, type RunOptions } from './runner'
+import { runGit, runGitForPath, type RunOptions } from './runner'
 import * as github from '../github'
 import * as prs from '../pullRequests'
 
@@ -58,7 +58,7 @@ const gitDirCache = new Map<string, string>()
 /** Resolve the top-level directory of the repository containing `path`. */
 export async function resolveRepoRoot(path: string): Promise<string> {
   try {
-    const top = (await runGit(path, ['rev-parse', '--show-toplevel'])).trim()
+    const top = await runGitForPath(path, ['rev-parse', '--show-toplevel'])
     if (!top) throw new Error('empty')
     return top
   } catch {
@@ -76,7 +76,7 @@ export class Repository implements RepoApi {
   async #gitDir(): Promise<string> {
     let dir = gitDirCache.get(this.path)
     if (!dir) {
-      dir = (await this.#git(['rev-parse', '--absolute-git-dir'])).trim()
+      dir = await runGitForPath(this.path, ['rev-parse', '--absolute-git-dir'])
       gitDirCache.set(this.path, dir)
     }
     return dir
