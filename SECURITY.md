@@ -28,6 +28,7 @@ Useful context for reports:
 - **API keys** for AI providers are encrypted with the operating system's keychain (Electron `safeStorage`) and stored in the app's user-data folder. After you save a key, the UI process never receives it again.
 - **GitHub** access reuses your GitHub CLI login (`gh auth token`) or `GITHUB_TOKEN` / `GH_TOKEN`. Gitlane doesn't store GitHub tokens.
 - **Network:** Gitlane talks to GitHub and to the AI providers you connect, and to nothing else. There is no telemetry.
+- **Update check:** a few seconds after startup and every six hours, Gitlane asks GitHub's public API for the latest release. The request carries only the app version (in the `User-Agent`), no account or repository information. Turn it off in *Preferences → Updates*. Nothing is downloaded or installed automatically.
 - **The coding agent** can only read and write inside the open repository. Paths are resolved and checked, symlinks included, and `.git` is off limits. File edits and shell commands wait for your approval unless you change the permission mode. Shell commands run with your user's permissions, so review them before allowing them.
 - **The renderer** runs sandboxed with context isolation and talks to the main process only through an allow-listed IPC bridge. Links in rendered Markdown open in your browser, and the app window can't be navigated away.
 
