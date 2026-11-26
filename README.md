@@ -52,6 +52,12 @@ Gitlane is a desktop Git client built around a clear, colorful commit graph, pai
 **Built-in terminal**
 - A real shell (ctrl+\`) in the repository folder, with tabs. Colors, vim and pagers all work, and anything you do there shows up in the graph right away.
 
+**Windows and WSL**
+- Open repositories that live inside WSL. Git, the terminal and the agent run in your Linux distribution, with your Linux git config, credentials and SSH keys. [More below](#windows-with-wsl).
+
+**Stays up to date**
+- Gitlane tells you when a new version is out, shows what changed, and links to the installer for your system.
+
 **Optional coding agent**
 - Ask it to explain, change or check code (⌘L). It reads and searches the repo, edits files and runs commands.
 - Edits and commands wait for your approval, with the diff or command shown first.
@@ -114,6 +120,28 @@ Gitlane needs **Git 2.31 or newer** on your `PATH`.
 > - **Linux:** `chmod +x Gitlane-linux-x86_64.AppImage` before running it.
 >
 > Windows and Linux builds are newer and less tested than the macOS one. Please [report anything odd](https://github.com/alouini333/gitlane/issues/new/choose).
+
+When a new version is out, an **Update available** button appears in the toolbar. It shows the release notes and downloads the installer for your system. You can check by hand or turn the automatic check off in *Preferences → Updates*.
+
+### Windows with WSL
+
+If your code lives in WSL, install the Windows version and open the repository from the Linux side. In the folder picker, choose **Linux** in the sidebar, then your distribution and the repository. Or paste a path such as `\\wsl.localhost\Ubuntu\home\you\project` into the address bar.
+
+For those repositories, Gitlane:
+
+- runs **git inside the distribution**, so your Linux git config, credentials and SSH keys are used, and you don't need Git for Windows;
+- opens the **integrated terminal** in your Linux shell, in the repository folder;
+- runs the **coding agent's commands** with bash inside Linux;
+- uses the GitHub CLI from Windows or, if you're only signed in there, from your default distribution.
+
+Git needs to be installed in the distribution (`sudo apt install git`). Commits, branch switches and fetches show up within a couple of seconds. Files you edit from Linux show up when you switch back to Gitlane.
+
+You can also run Gitlane inside WSL itself on Windows 11 (WSLg). Install the Linux package in your distribution and start it from there:
+
+```bash
+sudo apt install ./Gitlane-linux-amd64.deb
+gitlane
+```
 
 ## Connecting accounts
 

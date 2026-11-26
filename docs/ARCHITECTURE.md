@@ -11,13 +11,15 @@ src/
   main/                Electron main process (Node.js)
     index.ts           window, IPC handlers, recent repositories
     git/
-      runner.ts        spawns git: no TTY, prompts disabled, stable English output
+      runner.ts        spawns git (through wsl.exe for WSL repos): no TTY, prompts disabled, stable English output
       parsers.ts       pure parsers for log, refs, status v2, name-status, diffs
       repository.ts    every git operation the UI can request (RepoApi)
     github.ts          GitHub REST/GraphQL client: remote detection, auth via gh or env, caching
     pullRequests.ts    PR lists, details, reviews, comments, merging, creating
-    watcher.ts         debounced file watcher for the working tree and git dir
+    watcher.ts         debounced file watcher for the working tree and git dir (polls for WSL repos)
     terminal.ts        PTY sessions (node-pty) for the integrated terminal
+    wsl.ts             repositories inside WSL: maps \\wsl.localhost paths, runs programs via wsl.exe
+    updates.ts         update check against the latest GitHub release
     ai/
       adapter.ts       provider-neutral interface, SSE reader
       anthropic.ts     Claude via the official Anthropic SDK

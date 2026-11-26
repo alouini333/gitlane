@@ -13,10 +13,12 @@ export interface Settings {
   /** Preferred terminal font family ('' = default stack). */
   terminalFont: string
   terminalFontSize: number
+  /** Look for a newer release on GitHub at startup and every few hours. */
+  checkUpdates: boolean
 }
 
 const KEY = 'gitlane.settings'
-const DEFAULTS: Settings = { dirtySwitch: 'stash', remoteDoubleClick: 'reset', terminalFont: '', terminalFontSize: 12 }
+const DEFAULTS: Settings = { dirtySwitch: 'stash', remoteDoubleClick: 'reset', terminalFont: '', terminalFontSize: 12, checkUpdates: true }
 const DIRTY: DirtySwitchSetting[] = ['stash', 'stash-reapply', 'carry', 'ask']
 const REMOTE: RemoteDoubleClick[] = ['reset', 'ff', 'checkout']
 
@@ -30,7 +32,8 @@ function load(): Settings {
       terminalFontSize:
         typeof saved.terminalFontSize === 'number' && saved.terminalFontSize >= 8 && saved.terminalFontSize <= 32
           ? saved.terminalFontSize
-          : DEFAULTS.terminalFontSize
+          : DEFAULTS.terminalFontSize,
+      checkUpdates: typeof saved.checkUpdates === 'boolean' ? saved.checkUpdates : DEFAULTS.checkUpdates
     }
   } catch {
     return DEFAULTS
@@ -41,9 +44,9 @@ export const useSettings = create<Settings & { open: boolean }>(() => ({ ...load
 
 export function updateSettings(patch: Partial<Settings>) {
   useSettings.setState(patch)
-  const { dirtySwitch, remoteDoubleClick, terminalFont, terminalFontSize } = useSettings.getState()
+  const { dirtySwitch, remoteDoubleClick, terminalFont, terminalFontSize, checkUpdates } = useSettings.getState()
   try {
-    localStorage.setItem(KEY, JSON.stringify({ dirtySwitch, remoteDoubleClick, terminalFont, terminalFontSize }))
+    localStorage.setItem(KEY, JSON.stringify({ dirtySwitch, remoteDoubleClick, terminalFont, terminalFontSize, checkUpdates }))
   } catch {
     /* storage unavailable */
   }

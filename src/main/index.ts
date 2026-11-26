@@ -5,7 +5,9 @@ import { delimiter, join } from 'node:path'
 import { BrowserWindow, app, clipboard, dialog, ipcMain, net, safeStorage, shell, type WebContents } from 'electron'
 import type { ApiResult, AppApi, RepoChangeEvent } from '../shared/types'
 import { REPO_METHODS, Repository, resolveRepoRoot } from './git/repository'
-import { runGit } from './git/runner'
+import { runGit, runGitForPath } from './git/runner'
+import { checkForUpdate } from './updates'
+import { parseWslPath, wslShell } from './wsl'
 import { setFetch } from './github'
 import { TerminalManager } from './terminal'
 import type { AgentApi, AgentEvent, PermissionMode, ProviderId } from '../shared/agent'
@@ -53,7 +55,7 @@ async function activateRepo(sender: WebContents, path: string): Promise<string> 
   await rememberRepo(root)
 
   watchers.get(sender.id)?.dispose()
-  const gitDir = (await runGit(root, ['rev-parse', '--absolute-git-dir'])).trim()
+  const gitDir = await runGitForPath(root, ['rev-parse', '--absolute-git-dir'])
   const watcher = new RepoWatcher(root, gitDir, (kind) => {
     if (sender.isDestroyed()) return
     const event: RepoChangeEvent = { path: root, kind }
@@ -70,10 +72,16 @@ async function activateRepo(sender: WebContents, path: string): Promise<string> 
 
 function openTerminal(path: string) {
   const opts = { detached: true, stdio: 'ignore' as const }
-  if (process.platform === 'darwin') spawn('open', ['-a', 'Terminal', path], opts).unref()
+  const wsl = parseWslPath(path)
+  // A detached console program gets its own window on Windows.
+  if (wsl) spawn(wslShell(wsl).file, wslShell(wsl).args, opts).unref()
+  else if (process.platform === 'darwin') spawn('open', ['-a', 'Terminal', path], opts).unref()
   else if (process.platform === 'win32') spawn('cmd.exe', ['/c', 'start', 'cmd.exe'], { ...opts, cwd: path }).unref()
   else spawn('x-terminal-emulator', [], { ...opts, cwd: path }).unref()
 }
+
+/** Development builds can pretend to be another version, to try the update notice. */
+const appVersion = () => (!app.isPackaged && process.env.GITLANE_PRETEND_VERSION) || app.getVersion()
 
 type Handlers = { [K in keyof AppApi]: (sender: WebContents, ...args: Parameters<AppApi[K]>) => ReturnType<AppApi[K]> }
 
@@ -115,6 +123,19 @@ const appHandlers: Handlers = {
   },
   async copyText(_sender, text) {
     clipboard.writeText(text)
+  },
+  async version() {
+    return appVersion()
+  },
+  checkForUpdates() {
+    return checkForUpdate({
+      current: appVersion(),
+      platform: process.platform,
+      arch: process.arch,
+      appImage: !!process.env.APPIMAGE,
+      // Chromium's network stack: honors system proxy settings.
+      fetch: (input, init) => net.fetch(input as string, init)
+    })
   },
   async openExternal(_sender, url) {
     if (!/^https?:\/\//.test(url)) throw new Error('Only web links can be opened')

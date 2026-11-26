@@ -3,6 +3,7 @@ import { chmodSync, existsSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import * as pty from 'node-pty'
+import { parseWslPath, withWslEnv, wslShell } from './wsl'
 
 export interface TerminalSink {
   send(channel: 'term:data' | 'term:exit', id: number, payload: string | number): void
@@ -62,15 +63,18 @@ export class TerminalManager {
 
   create(owner: number, sink: TerminalSink, opts: CreateOptions): { id: number; shell: string } {
     ensureSpawnHelper()
+    // A repository inside WSL gets the distribution's own login shell, started in the repository.
+    const wsl = opts.shell ? null : parseWslPath(opts.cwd)
     const shell =
-      opts.shell ?? (process.platform === 'win32' ? 'powershell.exe' : process.env.SHELL || (process.platform === 'darwin' ? '/bin/zsh' : '/bin/bash'))
-    const args = opts.args ?? (process.platform === 'win32' ? [] : ['-l'])
+      opts.shell ??
+      (wsl ? wslShell(wsl).file : process.platform === 'win32' ? 'powershell.exe' : process.env.SHELL || (process.platform === 'darwin' ? '/bin/zsh' : '/bin/bash'))
+    const args = opts.args ?? (wsl ? wslShell(wsl).args : process.platform === 'win32' ? [] : ['-l'])
     const proc = pty.spawn(shell, args, {
       name: 'xterm-256color',
       cols: Math.max(2, Math.floor(opts.cols) || 80),
       rows: Math.max(1, Math.floor(opts.rows) || 24),
-      cwd: opts.cwd && existsSync(opts.cwd) ? opts.cwd : homedir(),
-      env: shellEnv()
+      cwd: !wsl && opts.cwd && existsSync(opts.cwd) ? opts.cwd : homedir(),
+      env: (wsl ? withWslEnv(shellEnv(), ['COLORTERM', 'TERM_PROGRAM']) : shellEnv()) as Record<string, string>
     })
     const id = this.#nextId++
     const session: Session = { proc, owner, sink, buffer: '', timer: null }
@@ -86,7 +90,7 @@ export class TerminalManager {
       this.#sessions.delete(id)
       if (!sink.isDestroyed()) sink.send('term:exit', id, exitCode)
     })
-    return { id, shell: basename(shell) }
+    return { id, shell: wsl ? wsl.distro : basename(shell) }
   }
 
   #flush(id: number) {

@@ -3,6 +3,7 @@ import { cloneRepoDialog, initRepoDialog, openRepoDialog } from '../actions'
 import { openRepo, useStore } from '../store'
 import { repoName } from '../util'
 import { Icon } from './Icon'
+import { UpdateNotice } from './Updates'
 import logo from '../../../../assets/logo.svg'
 
 export function Welcome() {
@@ -19,6 +20,7 @@ export function Welcome() {
             <h1>Gitlane</h1>
             <p>A fast, open-source Git client</p>
           </div>
+          <UpdateNotice className="welcome-update" />
         </div>
 
         <div className="welcome-actions">

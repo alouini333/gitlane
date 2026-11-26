@@ -474,6 +474,24 @@ export interface AppApi {
   revealPath(path: string): Promise<void>
   copyText(text: string): Promise<void>
   openExternal(url: string): Promise<void>
+  /** This build's version, e.g. "0.1.1". */
+  version(): Promise<string>
+  checkForUpdates(): Promise<UpdateInfo>
+}
+
+export interface UpdateInfo {
+  current: string
+  /** Latest published version, or null when there is no release yet. */
+  latest: string | null
+  /** True when `latest` is newer than `current`. */
+  available: boolean
+  releaseUrl: string | null
+  /** Release notes rendered by GitHub (sanitize before display). */
+  notesHtml: string
+  publishedAt: string | null
+  /** The installer for this system, or the release page when there isn't one. */
+  downloadUrl: string | null
+  downloadName: string | null
 }
 
 export type ApiResult<T> = { ok: true; value: T } | { ok: false; error: string }

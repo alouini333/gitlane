@@ -7,6 +7,7 @@ import { setTab, useAgent } from '../agent'
 import { closeRepo, openRepo, refresh, showMenu, useStore, type MenuItem } from '../store'
 import { cls, repoName } from '../util'
 import { Icon } from './Icon'
+import { UpdateNotice } from './Updates'
 
 function ToolButton(props: {
   icon: string
@@ -127,6 +128,7 @@ export function Toolbar() {
             <span className="spinner" /> {busy}
           </span>
         )}
+        <UpdateNotice />
         <button className="icon-btn" title="Refresh" onClick={() => refresh('all')}>
           <Icon name="refresh" size={15} />
         </button>

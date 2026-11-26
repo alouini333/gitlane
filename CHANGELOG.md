@@ -4,6 +4,16 @@ All notable changes to Gitlane are documented here. The format follows [Keep a C
 
 ## [Unreleased]
 
+### Added
+
+- **Repositories inside WSL** on Windows: open a repository under `\\wsl.localhost\<distro>\…` and git, the integrated terminal and the coding agent's commands run inside that Linux distribution, with its git config, credentials and SSH keys.
+- **Update check:** when a newer release is out, an "Update available" button shows its notes and downloads the installer for your system. Check by hand or turn it off in *Preferences → Updates*.
+
+### Fixed
+
+- Windows: git and agent commands now run with their console windows hidden.
+- Linux: the .deb also depends on `libgbm1` and `libasound2`, so it installs and starts on minimal systems such as a fresh WSL distribution.
+
 ## [0.1.1] - 2026-11-25
 
 ### Fixed
