@@ -53,6 +53,20 @@ jobs:
           distribution: Ubuntu-24.04
           additional-packages: git
 
+      # A freshly installed distribution asks to create a Unix user the first time an interactive
+      # shell starts (the terminal test does). Real installations have done this already.
+      - name: Finish the distribution's first-run setup
+        shell: pwsh
+        run: |
+          wsl -d Ubuntu-24.04 -u root --exec sh -c "id -u ada >/dev/null 2>&1 || useradd -m -s /bin/bash ada"
+          $key = Get-ChildItem HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss |
+            Where-Object { (Get-ItemProperty $_.PSPath).DistributionName -eq 'Ubuntu-24.04' }
+          Get-ItemProperty $key.PSPath | Format-List
+          Set-ItemProperty $key.PSPath -Name RunOOBE -Value 0 -Type DWord
+          Set-ItemProperty $key.PSPath -Name DefaultUid -Value 1000 -Type DWord
+          wsl --terminate Ubuntu-24.04
+          wsl -d Ubuntu-24.04 --exec id
+
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
